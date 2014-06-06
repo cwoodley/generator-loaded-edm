@@ -1,227 +1,163 @@
-module.exports = function(grunt) {
-		var globalConfig = {
-				source: './source',
-				build: './build/source',
-				assets: './source/assets'
-		};
+// Generated on 2014-05-21 using generator-webapp 0.4.9
+'use strict';
 
-		require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);    
+// # Globbing
+// for performance reasons we're only matching one level down:
+// 'test/spec/{,*/}*.js'
+// use this if you want to recursively match all subfolders:
+// 'test/spec/**/*.js'
 
-		grunt.initConfig({
-			pkg: require('./package.json'),
-			globalConfig: globalConfig,
-			// local webserver
-			express: {
-				all: {
-					options: {
-						port: 9000,
-						hostname: "*",
-						bases: ['<%%= globalConfig.source %>'],
-						livereload: true
-					}
-				}
-			},
-			// compile CSS from SCSS files
-			sass: {
-				dist: {
-					options: {
-						style: 'compressed'
-					},
-					files: {
-						'<%= globalConfig.assets %>/stylesheets/css/<%%=pkg.name %>.css': '<%= globalConfig.assets %>/stylesheets/sass/<%%=pkg.name %>.scss'
-					}
-				},
-				dev: {
-					options: {
-						style: 'expanded',
-						debugInfo: true,
-						lineNumbers: true,
-					},
-					files: {
-						'<%= globalConfig.assets %>/stylesheets/css/<%%=pkg.name %>.css': '<%= globalConfig.assets %>/stylesheets/sass/<%%=pkg.name %>.scss'
-					}
-				}
-			},    
-			// watch for file changes and reload browser windows 
-			watch: {
-				all: {
-					files: '<%%= globalConfig.source %>/index.html',
-					options: {
-						livereload: true,
-						spawn: false
-					}
-			 	},
-				js: {
-					files: ['<%%= globalConfig.assets %>/javascripts/*.js'],
-					tasks: ['concat:js'],
-					options: {
-						livereload: true,
-						spawn: false
-					}
-				},
-				css: {
-					files: ['<%= globalConfig.assets %>/stylesheets/sass/*.scss'],
-					tasks: ['sass:dev'],
-					options: {
-						livereload: true,
-						spawn: false
-					}
-				}
-			},
-			// open your browser at the project's URL
-			open: {
-				all: {
-					path: 'http://localhost:<%%= express.all.options.port%>'
-					app: "<%= devBrowser %>"
-				}
-			},   
-			// clear out build directory
-			clean: {
-				build: [
-					'build'
-				]
-			},
-			// copy project files to build dir
-			copy: {
-				main: {
-					files: [{
-						expand: true,
-						src: [
-							'<%= globalConfig.source %>/**',
-							'!<%=globalConfig.assets %>/stylesheets/sass/**',
-							'!<%=globalConfig.assets %>/images/sprites/**',
-							'!<%=globalConfig.assets %>/vendor/*.js',
-						],
-						dest: 'build/'
-					}]
-				},
-			},
-			// compress compiled CSS
-			cssmin: {
-				production: {
-						expand: true,
-						cwd: '<%%=globalConfig.assets %>/stylesheets/css',
-						src: ['*.css'],
-						dest: '<%%=globalConfig.assets %>/stylesheets/css'
-				}
-			},
-			// compress images
-			imagemin: {
-				png: {
-					options: {
-						optimizationLevel: 7
-					},
-					files: [
-						{
-							expand: true,
-							cwd: '<%=globalConfig.assets %>/images/',
-							src: ['**/*.png'],
-							dest: '<%= globalConfig.assets %>/images/',
-							ext: '.png'
-						}
-					]
-				},
-				jpg: {
-					options: {
-						progressive: true
-					},
-					files: [
-						{
-							expand: true,
-							cwd: '<%= globalConfig.assets %>/images/',
-							src: ['**/*.jpg', '!**/sprites/**'],
-							dest: '<%= globalConfig.build %>/assets/images/',
-							ext: '.jpg'
-						}
-					]
-				}
-			},
-			// merge all vendor scripts into one file
-			concat: {
-				js: {
-					options: {
-							separator: ';'
-					},
-					src: [
-							'<%=globalConfig.assets %>/vendor/*.js'
-					],
-					dest: '<%= globalConfig.assets %>/javascripts/<%= pkg.name %>.vendor.min.js'
-				},
-			},
-			// compress merged vendor scripts file
-			uglify: {
-				options: {
-					mangle: false
-				},
-				js: {
-					files: {
-					'<%= globalConfig.assets %>/javascripts/<%= pkg.name %>.vendor.min.js': ['<%= globalConfig.assets %>/javascripts/<%= pkg.name %>.vendor.min.js']
-					}
-				}
-			},
-			// create a deliverable zip file of built project
-			compress: {
-				main: {
-					options: {
-						archive: 'dist/<%=pkg.name %>-build_'+grunt.template.today('ddmmHHMM')+'.zip'
-					},
-					files: [
-						{
-							expand: true,
-							cwd: '<%= globalConfig.build %>',
-							src: ['**'],
-							dest: '<%= pkg.name %>/'
-						} // makes all src relative to cwd
-					]
-				}
-			},		        
-			sprite:{
-				all: {
-					engine: 'gm',
-					engineOpts: {
-						'imagemagick': true
-					},	      
-					algorithm: 'alt-diagonal',
-					src: '<%= globalConfig.assets %>/images/sprites/*.png',
-					destImg: '<%= globalConfig.assets %>/images/spritesheet.png',
-					destCSS: '<%= globalConfig.assets %>/stylesheets/sass/_spritesheet.scss',
-					cssOpts: {
-						// Some templates allow for skipping of function declarations
-						functions: true,
+module.exports = function (grunt) {
 
-						// CSS template allows for overriding of CSS selectors
-						// cssClass: function (item) {
-						//   return '.bottle-' + item.name;
-						// }
-					}
-				}
-			},
-			processhtml: {
-				dist: {
-					files: {
-						'<%= globalConfig.build %>/index.html': ['<%= globalConfig.source %>/index.html']
-					}
-				}
-			}	 			    
-		});
+    // Load grunt tasks automatically
+    require('load-grunt-tasks')(grunt);
 
-		grunt.event.on('watch', function(action, filepath, target) {
-			grunt.log.writeln(target + ': ' + filepath + ' has ' + action);
-		});
+    // Time how long tasks take. Can help when optimizing build times
+    require('time-grunt')(grunt);
 
-		// Creates the `server` task
-		grunt.registerTask('server', [
-			'express',
-			'sass:dev',
-			'watch'
-		]);
+    // Configurable paths
+    var config = {
+        app: 'app',
+        dist: 'dist'
+    };
 
-		// Default task.
-		grunt.registerTask('default', ['server']);
+    // Define the configuration for all the tasks
+    grunt.initConfig({
 
-		// Build for checking
-		grunt.registerTask('nozip', ['clean','sass:dist','concat','uglify','copy','processhtml',]);    
+        pkg: require('./package.json'),
 
-		// Build for delivery
-		grunt.registerTask('build', ['nozip','compress']);   
+        // Project settings
+        config: config,
+
+        // Watches files for changes and runs tasks based on the changed files
+        watch: {
+            gruntfile: {
+              files: ['Gruntfile.js']
+            },
+            livereload: {
+              options: {
+                livereload: '<%%= connect.options.livereload %>'
+              },
+              files: [
+                '<%%= config.app %>/index.html',
+                '<%%= config.app %>/images/{,*/}*'
+              ]
+            },
+            files: ['<%%= config.app %>/index.html'],
+            tasks: ['inlinecss']
+        },
+
+        // The actual grunt server settings
+        connect: {
+            options: {
+                port: 9000,
+                open: false,
+                livereload: 35729,
+                // Change this to '0.0.0.0' to access the server from outside
+                hostname: '0.0.0.0'
+            },
+            livereload: {
+                options: {
+                    middleware: function(connect) {
+                        return [
+                            connect.static(config.app)
+                        ];
+                    }
+                }
+            },
+            dist: {
+                options: {
+                    base: '<%%= config.dist %>',
+                    livereload: false
+                }
+            }
+        },
+        inlinecss: {
+          main: {
+            options: {
+            },
+            files: {
+              '<%%= config.app %>/template.html': '<%%= config.app %>/index.html'
+            }
+          }
+        },
+        replace: {
+          example: {
+            src: ['<%%= config.dist %>/template.html'],             // source files array (supports minimatch)
+            dest: '<%%= config.dist %>/template.html',             // destination directory or file
+            replacements: [{
+              from: '<%%= pkg.stagingPath %><%%= pkg.name %>/',                   // string replacement
+              to: './'
+            }]
+          }
+        },
+        // Empties folders to start fresh
+        clean: {
+            dist: {
+                files: [{
+                    dot: true,
+                    src: [
+                        '<%%= config.dist %>/*',
+                        '!<%%= config.dist %>/.git*'
+                    ]
+                }]
+            },
+            server: '.tmp'
+        },
+
+        // Copies remaining files to places other tasks can use
+        copy: {
+          dist: {
+            files: [{
+              expand: true,
+              dot: true,
+              cwd: '<%%= config.app %>',
+              dest: '<%%= config.dist %>',
+              src: [
+                'images/*',
+                'template.html'
+              ]
+            }]
+          }
+        },
+        compress: {
+          main: {
+            options: {
+              archive: 'builds/<%%= pkg.name %>-build_'+grunt.template.today('ddmmHHMM')+'.zip'
+            },
+            files: [
+                {expand: true, cwd: '<%%= config.dist %>', src: ['**'], dest: '<%%= pkg.name %>/'}, // makes all src relative to cwd
+            ]
+          }
+        },            
+    });
+
+
+    grunt.registerTask('serve', function (target) {
+        if (target === 'dist') {
+            return grunt.task.run(['build', 'connect:dist:keepalive']);
+        }
+
+        grunt.task.run([
+            'clean:server',
+            'connect:livereload',
+            'watch'
+        ]);
+    });
+
+    grunt.registerTask('server', function (target) {
+        grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
+        grunt.task.run([target ? ('serve:' + target) : 'serve']);
+    });
+
+    grunt.registerTask('build', [
+        'clean:dist',
+        'copy:dist',
+        'replace',
+        'compress'
+    ]);
+
+    grunt.registerTask('default', [
+        'build'
+    ]);
 };

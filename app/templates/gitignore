@@ -1,7 +1,6 @@
 .DS_Store
 
 .sass-cache/
-assets/
-build/
+builds/
 dist/
 node_modules/
