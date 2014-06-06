@@ -24,6 +24,7 @@ A generator for [Yeoman](http://yeoman.io) to bootstrap a new email template pro
 	mkdir myProject && cd myProject
 	```
 5. Run the generator: ` yo loaded-edm `
+6. Install necessary npm modules: ` npm install `
 
 
 ## Usage
